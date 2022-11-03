@@ -1,4 +1,11 @@
-import {Image, Text, TouchableOpacity, View} from 'react-native';
+import {
+  FlatList,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React, {Component} from 'react';
 import styles from './styles/styles';
 
@@ -87,47 +94,46 @@ const dataFeeds = [
     time: '1 minutes',
   },
 ];
+
+const newDataFeeds = dataFeeds.map((feed, idx) => {
+  return {...feed, id: idx, loveCount: 2, commentCount: 4};
+});
+
 export default class NewsFeed extends Component {
   state = {
-    loveCount: 2,
-    commenCount: 4,
+    feeds: newDataFeeds,
   };
 
-  _onClickChangeLoveCount = prevState => {
-    return this.setState({
-      loveCount: prevState + 1,
-    });
+  _onClickChangeLoveCount = id => {
+    const idx = this.state.feeds.findIndex(feed => feed.id === id);
+    const updatedFeeds = [...this.state.feeds];
+    updatedFeeds[idx] = {
+      ...updatedFeeds[idx],
+      loveCount: updatedFeeds[idx].loveCount++,
+    };
+    this.setState(updatedFeeds);
   };
 
   _renderAvatar = () => {
-    return dataAvatar.length <= 5
-      ? dataAvatar.map((avatar, index) => {
-          return (
-            <View key={index} style={styles.avatarItem}>
-              <Image style={styles.avatar} source={avatar.image} />
-              <Text>{avatar.name}</Text>
-            </View>
-          );
-        })
-      : dataAvatar.slice(0, 5).map((avatar, index) => {
-          return (
-            <View key={index}>
-              <Image style={styles.avatar} source={avatar.image} />
-              <Text>{avatar.name}</Text>
-            </View>
-          );
-        });
+    return dataAvatar.map((avatar, index) => {
+      return (
+        <View key={index} style={styles.avatarItem}>
+          <Image style={styles.avatar} source={avatar.image} />
+          <Text style={{textAlign: 'center'}}>{avatar.name}</Text>
+        </View>
+      );
+    });
   };
 
   _renderFeedHeader = feed => {
     return (
       <View style={styles.feedItemHeader}>
-        <Image style={styles.avatar} source={feed.image} />
+        <Image style={styles.avatar} source={feed.item.image} />
         <View>
-          <Text>{feed.title}</Text>
+          <Text>{feed.item.title}</Text>
           <View style={styles.feedItemTitleContainer}>
-            <Text style={styles.feedItemTitleText}>{feed.name}</Text>
-            <Text style={styles.feedItemTitleText}>{feed.time}</Text>
+            <Text style={styles.feedItemTitleText}>{feed.item.name}</Text>
+            <Text style={styles.feedItemTitleText}>{feed.item.time}</Text>
           </View>
         </View>
         <Image style={styles.icon} source={require('../../assets/dots.png')} />
@@ -136,18 +142,20 @@ export default class NewsFeed extends Component {
   };
 
   _renderFeedBody = feed => {
+    // console.log('==========feed');
+    // console.log(feed.item);
     return (
       <View>
-        <Text>{feed.content}</Text>
+        <Text>{feed.item.content}</Text>
         <View style={styles.feedBody__icons}>
           <TouchableOpacity
-            onPress={() => this._onClickChangeLoveCount(this.state.loveCount)}>
+            onPress={() => this._onClickChangeLoveCount(feed.index)}>
             <Image
               style={styles.icon}
               source={require('../../assets/heart.png')}
             />
           </TouchableOpacity>
-          <Text>{this.state.loveCount}</Text>
+          <Text>{feed.item.loveCount}</Text>
           <Image
             style={[styles.icon, {marginLeft: 10}]}
             source={require('../../assets/comment.png')}
@@ -168,12 +176,6 @@ export default class NewsFeed extends Component {
     );
   };
 
-  _renderNewsFeed = () => {
-    return dataFeeds.map((feed, index) => {
-      return <View key={index}>{this._renderFeedItems(feed)}</View>;
-    });
-  };
-
   render() {
     return (
       <View style={styles.container}>
@@ -188,8 +190,18 @@ export default class NewsFeed extends Component {
             source={require('../../assets/edit.png')}
           />
         </View>
-        <View style={styles.avatarContainer}>{this._renderAvatar()}</View>
-        {this._renderNewsFeed()}
+        <ScrollView
+          horizontal={true}
+          showsHorizontalScrollIndicator={true}
+          style={styles.avatarContainer}>
+          {this._renderAvatar()}
+        </ScrollView>
+        <FlatList
+          data={this.state.feeds}
+          renderItem={data => {
+            return this._renderFeedItems(data);
+          }}
+        />
       </View>
     );
   }

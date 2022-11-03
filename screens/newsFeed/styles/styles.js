@@ -33,15 +33,12 @@ export const styles = StyleSheet.create({
     fontWeight: '500',
   },
   avatarContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
     borderBottomColor: '#EBECF0',
     borderBottomWidth: 1,
-    paddingBottom: 10,
+    paddingBottom: 25,
   },
   avatarItem: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingHorizontal: 12,
   },
   avatar: {
     width: 50,
